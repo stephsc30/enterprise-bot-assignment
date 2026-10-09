@@ -81,10 +81,10 @@ metrics:
     VERSION: "2.0.0"
   resources:
     requests:
-      cpu: "2"
+      cpu: "50m"
       memory: "64Mi"
     limits:
-      cpu: "4"
+      cpu: "200m"
       memory: "128Mi"
 
 migrate:
