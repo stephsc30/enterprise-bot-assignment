@@ -35,7 +35,7 @@ gateway:
     APP_MODE: "gateway"
     APP_NAME: "gateway"
     VERSION: "2.0.0"
-    BACKEND_URL: "http://backend.default.svc:8080"
+    BACKEND_URL: "http://backend:8080"
   resources:
     requests:
       cpu: "50m"
