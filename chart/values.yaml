@@ -1,0 +1,25 @@
+replicaCount: 2
+
+image:
+  repository: eb-demo
+  tag: dev
+  pullPolicy: IfNotPresent
+
+config:
+  appName: eb-demo
+  version: "1.0.0"
+
+service:
+  port: 80
+
+ingress:
+  host: demo.local
+  className: nginx
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi

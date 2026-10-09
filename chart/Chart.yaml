@@ -1,0 +1,6 @@
+apiVersion: v2
+name: eb-demo
+description: HTTP demonstration service for the Enterprise Bot assignment
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
