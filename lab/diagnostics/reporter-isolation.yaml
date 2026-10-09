@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: reporter-isolation-check
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: reporter
+  namespace: reporter-isolation-check
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: reporter-read
+  namespace: reporter-isolation-check
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: reporter-read
+  namespace: reporter-isolation-check
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: reporter-read
+subjects:
+  - kind: ServiceAccount
+    name: reporter
+    namespace: reporter-isolation-check
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: reporter
+  namespace: reporter-isolation-check
+spec:
+  serviceAccountName: reporter
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+  containers:
+    - name: reporter
+      image: docker.io/ebinterview/eb-debug-app:1.0.1
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: APP_MODE
+          value: reporter
+        - name: PORT
+          value: "8080"
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+      readinessProbe:
+        httpGet:
+          path: /healthz
+          port: 8080
+        periodSeconds: 5
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi

@@ -1,0 +1,165 @@
+ubuntu-super@HYD018416A:~/projects/eb-devops-takehome$ ./setup.sh
+WARNING: No blkio throttle.read_bps_device support
+WARNING: No blkio throttle.write_bps_device support
+WARNING: No blkio throttle.read_iops_device support
+WARNING: No blkio throttle.write_iops_device support
+WARNING: DOCKER_INSECURE_NO_IPTABLES_RAW is set
+WARNING: daemon is not using the default seccomp profile
+==> Checking the application chart
+==> Linting ./chart
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+==> Reusing kind cluster demo
+Set kubectl context to "kind-demo"
+node/demo-control-plane condition met
+==> Installing ingress-nginx
+"ingress-nginx" has been added to your repositories
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "ingress-nginx" chart repository
+Update Complete. ⎈Happy Helming!⎈
+Release "ingress-nginx" has been upgraded. Happy Helming!
+NAME: ingress-nginx
+LAST DEPLOYED: Fri Oct  9 13:01:57 2026
+NAMESPACE: ingress-nginx
+STATUS: deployed
+REVISION: 2
+TEST SUITE: None
+NOTES:
+The ingress-nginx controller has been installed.
+Get the application URL by running these commands:
+  export HTTP_NODE_PORT=30080
+  export HTTPS_NODE_PORT=30443
+  export NODE_IP="$(kubectl get nodes --output jsonpath="{.items[0].status.addresses[1].address}")"
+
+  echo "Visit http://${NODE_IP}:${HTTP_NODE_PORT} to access your application via HTTP."
+  echo "Visit https://${NODE_IP}:${HTTPS_NODE_PORT} to access your application via HTTPS."
+
+An example Ingress that makes use of the controller:
+  apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: example
+    namespace: foo
+  spec:
+    ingressClassName: nginx
+    rules:
+      - host: www.example.com
+        http:
+          paths:
+            - pathType: Prefix
+              backend:
+                service:
+                  name: exampleService
+                  port:
+                    number: 80
+              path: /
+    # This section is only required if TLS is to be enabled for the Ingress
+    tls:
+      - hosts:
+        - www.example.com
+        secretName: example-tls
+
+If TLS is enabled for the Ingress, a Secret containing the certificate and key must also be provided:
+
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: example-tls
+    namespace: foo
+  data:
+    tls.crt: <base64 encoded cert>
+    tls.key: <base64 encoded key>
+  type: kubernetes.io/tls
+==> Building and loading the service image
+[+] Building 2.5s (14/14) FINISHED                                                                       docker:default
+ => [internal] load build definition from Dockerfile                                                               0.1s
+ => => transferring dockerfile: 749B                                                                               0.0s
+ => [internal] load metadata for docker.io/library/python:3.13.16-slim-bookworm                                    2.2s
+ => [auth] library/python:pull token for registry-1.docker.io                                                      0.0s
+ => [internal] load .dockerignore                                                                                  0.0s
+ => => transferring context: 110B                                                                                  0.0s
+ => [internal] load build context                                                                                  0.0s
+ => => transferring context: 63B                                                                                   0.0s
+ => [builder 1/4] FROM docker.io/library/python:3.13.16-slim-bookworm@sha256:a1165e272e578941b84abc79e4ab38a0305c  0.0s
+ => CACHED [runtime 2/5] RUN groupadd --gid 10001 app     && useradd --uid 10001 --gid app         --no-create-ho  0.0s
+ => CACHED [runtime 3/5] WORKDIR /app                                                                              0.0s
+ => CACHED [builder 2/4] WORKDIR /build                                                                            0.0s
+ => CACHED [builder 3/4] COPY requirements.txt .                                                                   0.0s
+ => CACHED [builder 4/4] RUN python -m venv /opt/venv     && /opt/venv/bin/pip install --no-cache-dir -r requirem  0.0s
+ => CACHED [runtime 4/5] COPY --from=builder /opt/venv /opt/venv                                                   0.0s
+ => CACHED [runtime 5/5] COPY app.py .                                                                             0.0s
+ => exporting to image                                                                                             0.0s
+ => => exporting layers                                                                                            0.0s
+ => => writing image sha256:97eb1ad147a93e6fba49ec394acff16adac36b6b32a5fbe162fc191e3b68a818                       0.0s
+ => => naming to docker.io/library/eb-demo:dev                                                                     0.0s
+Image: "eb-demo:build-97eb1ad147a93e6fba49ec394acff16adac36b6b32a5fbe162fc191e3b68a818" with ID "sha256:97eb1ad147a93e6fba49ec394acff16adac36b6b32a5fbe162fc191e3b68a818" found to be already present on all nodes.
+==> Deploying the application
+Release "demo" has been upgraded. Happy Helming!
+NAME: demo
+LAST DEPLOYED: Fri Oct  9 13:02:21 2026
+NAMESPACE: demo
+STATUS: deployed
+REVISION: 2
+TEST SUITE: None
+deployment "demo" successfully rolled out
+NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/demo   2/2     2            2           4m54s
+
+NAME                      READY   STATUS    RESTARTS   AGE
+pod/demo-86b457cf-jdpq4   1/1     Running   0          4m54s
+pod/demo-86b457cf-vfc5s   1/1     Running   0          4m54s
+
+NAME           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+service/demo   ClusterIP   10.96.246.243   <none>        80/TCP    4m54s
+
+NAME                             CLASS   HOSTS        ADDRESS        PORTS   AGE
+ingress.networking.k8s.io/demo   nginx   demo.local   10.96.39.255   80      4m54s
+Setup completed. Verify from the same machine with:
+curl --noproxy '*' --resolve demo.local:8080:127.0.0.1 http://demo.local:8080/
+ubuntu-super@HYD018416A:~/projects/eb-devops-takehome$ echo "Setup exit code: $?"
+Setup exit code: 0
+ubuntu-super@HYD018416A:~/projects/eb-devops-takehome$ curl --noproxy '*' --fail --silent --show-error \
+  --resolve demo.local:8080:127.0.0.1 \
+  http://demo.local:8080/
+{"app":"eb-demo","pod":"demo-86b457cf-jdpq4","version":"1.0.0"}
+ubuntu-super@HYD018416A:~/projects/eb-devops-takehome$ git add setup.sh
+ubuntu-super@HYD018416A:~/projects/eb-devops-takehome$ git update-index --chmod=+x setup.sh
+ubuntu-super@HYD018416A:~/projects/eb-devops-takehome$ git diff --cached --check
+ubuntu-super@HYD018416A:~/projects/eb-devops-takehome$ git commit -m "Add repeatable kind setup with configurable host ports"
+[main e4ee170] Add repeatable kind setup with configurable host ports
+ 1 file changed, 140 insertions(+)
+ create mode 100755 setup.sh
+ubuntu-super@HYD018416A:~/projects/eb-devops-takehome$ kubectl --context kind-demo -n demo get pods
+NAME                  READY   STATUS    RESTARTS   AGE
+demo-86b457cf-jdpq4   1/1     Running   0          7m16s
+demo-86b457cf-vfc5s   1/1     Running   0          7m16s
+ubuntu-super@HYD018416A:~/projects/eb-devops-takehome$ kubectl --context kind-demo -n demo patch configmap demo \
+  --type merge \
+  -p '{"data":{"APP_NAME":"patched-app","VERSION":"7.7.7"}}'
+configmap/demo patched
+ubuntu-super@HYD018416A:~/projects/eb-devops-takehome$ for pod in $(kubectl --context kind-demo -n demo get pods \
+  -l app.kubernetes.io/instance=demo \
+  -o jsonpath='{.items[*].metadata.name}'); do
+  echo "Checking $pod"
+  kubectl --context kind-demo -n demo exec "$pod" -- \
+    python -c 'import urllib.request; print(urllib.request.urlopen("http://127.0.0.1:8080/", timeout=5).read().decode())'
+done
+Checking demo-86b457cf-jdpq4
+{"app":"patched-app","pod":"demo-86b457cf-jdpq4","version":"7.7.7"}
+
+Checking demo-86b457cf-vfc5s
+{"app":"patched-app","pod":"demo-86b457cf-vfc5s","version":"7.7.7"}
+
+ubuntu-super@HYD018416A:~/projects/eb-devops-takehome$ curl --noproxy '*' --fail --silent --show-error \
+  --resolve demo.local:8080:127.0.0.1 \
+  http://demo.local:8080/
+{"app":"patched-app","pod":"demo-86b457cf-jdpq4","version":"7.7.7"}
+ubuntu-super@HYD018416A:~/projects/eb-devops-takehome$ kubectl --context kind-demo -n demo get pods
+NAME                  READY   STATUS    RESTARTS   AGE
+demo-86b457cf-jdpq4   1/1     Running   0          9m12s
+demo-86b457cf-vfc5s   1/1     Running   0          9m12s
+ubuntu-super@HYD018416A:~/projects/eb-devops-takehome$ kubectl --context kind-demo -n demo patch configmap demo \
+  --type merge \
+  -p '{"data":{"APP_NAME":"eb-demo","VERSION":"1.0.0"}}'
+configmap/demo patched
